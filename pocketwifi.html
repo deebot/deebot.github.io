@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>Working with rpmsg on PRU0 and PRU1</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">Working with rpmsg on PRU0 and PRU1</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">Aug 24, 2020</span>
+
+                    <h1>
+                        <br />
+                        Internet Access on Pocket Beagle </h1>
+
+                </header>
+
+                <p>
+                    While using a pocket beagle you would quickly realise that you would need access to internet
+                    connection
+                    on it. But since it doesnot have a wifi chip onboard nor does it have a ethernet RJ45 port . You are
+                    need to go extra mile to get the internet working. You have with two solutions. First one is to add
+                    a physical hardware USB as shown below, attach a wifi dongle and use connman commands as in
+                    beaglewireless
+
+
+                <div class="image"><img src="images/usbpoc.PNG" alt="" width=400></div>
+                </p>
+                <p>
+                    This picture is originally posted by Jason Kridner and you can access the thread here.
+                    <a href="https://groups.google.com/g/beagleboard/c/GOwSuY4oiyI" style="color:rgba(255,0,0,0.5);">
+                        here</a>
+                    The other method is to make the laptop to which your pocketbeagle is connected as the default
+                    gateway to
+                    route all the traffic. The posts I saw so far used some iptable commands to configure the IP tables.
+                    However as I was trying to get internet for me working , my mentor pointed me to something called
+                    nm-connection-editor, which I think is a cleaner way to configure internet. In this post I am
+                    sharing the steps.
+
+                </p>
+
+                <p>
+                    After connecting my pocket beagle I see the following interfaces along the IP addresses when I do
+                    "ifconfig" on my ubuntu 18.04.1
+                <ul>
+                    <li>enx985dadd7619f - 192.168.7.1</li>
+                    <li>enx985dadd76la1 – 192.168.6.1</li>
+                    <li>wlplso – 192.168.1.78</li>
+                </ul>
+
+                On runing ifconfig on my pocket I get following interfaces and corresponding IP
+                <ul>
+                    <li> usb0 -- 192.168.7.2</li>
+                    <li> usb1 --192.168.6.2 </li>
+                </ul>
+
+                I am sharing these so that you can corelate with your IP address on your interfaces. After doing
+                this run "nm-connection-editor" You should see a window like shown below.
+                </p>
+                <div class="image"><img src="images/nmconn1.png" alt="" width=400></div>
+                <p>
+
+
+
+                    I clicked on the + button onthe buttom left and
+                    added the wired connection 2. Here I changed the method to “shared to other computers” and added the
+                    IP
+                    address and subnet as shown below.
+                </p>
+                <div class="image"><img src="images/nmcon2.png" alt="" width=400></div>
+
+                <p>
+
+                    Then on my pocketbeagle I ran the following command to set my laptop as default gateway for
+                    pocketbeagle
+
+                    <code>sbin/route add default gw 192.168.7.1</code> </br>
+
+
+                    Now if you run the "route" command you should see the following output.</br>
+                <div class="image"><img src="images/nm3.png" alt="" width=400></div> </br>
+
+                Finally you need to run the following command
+                <code>sudo dhclient usb1</code>
+
+                This final step need to be run everytime you reebot and you would have access to internet.
+
+
+                </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </section>
+
+        </div>
+
+
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

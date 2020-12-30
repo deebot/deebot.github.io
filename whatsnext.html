@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>Whats Next</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">Whats Next</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">July 27, 2020</span>
+
+                    <h1>
+                        <br />
+                        whats Next</h1>
+
+                </header>
+
+                Whats Next?
+
+		   EDIT: PARALLEL PORT PROPOSAL:
+		    		    <p>
+I spent some time on the 8088 ans how its parallel bus functions as I had to implement a parallel bidirectionalbus for my GSOC project. 
+And it took be back in time So Unlike the modern day microcontrollers  the pins  gives you a interface to the bus  depending on what you want to do  you connect 
+a i/p port or o/p port to it and can have  a memory read write operations or i/o read write operations. 
+The bus is multiplexed and data or address can be sent over it. On a 8088 when  data is sent the ALE pin is set as 0 and when address is set it is set to 1. 
+Then I also went through the parallel printer port  and how it works so with all this back ground I propose the following.
+					    
+					    <p>
+The PRU is seen as a parllel port by the kernel and the message from the LKM is transferred using RPMSG. 
+There is a 4 bit data bus since we have contraint on the no of PRU pins on the pocketbeagle and the beaglewireless that I have will be used to run beaglelogic. 
+						    
+	 <div class="image main"><img src="images/prop.PNG" alt="" /></div>
+
+Explanation:
+
+When we want to send out data from the Parallel port which is out PRU. The  pins D0 -D3 are set as output pins. When a new data is loded. The strobe pin will be pulled high to tell the receiving device that new valid data is loaded and it should  read it. The device will read the data and once finished it will pull the ack pin high thus the PRU(virtual parallel port) will know that it can do the second transection.
+
+When This parallel port wants to act as input the all DO-D4 will be the input pin strobe (STR) will also be a input pin and Ack on the PRU will be a outputpin. Now similar stuff will happen. PRU will check for STR pin once it is high it will read and then will pull the ACK high.
+
+
+In the LKM parallel port API will be used to  showup PRU as a parallel port.
+		    
+		    
+		    
+		    </p>
+		    
+		   <h2>OLD THOUGHTS</h2> 
+		    
+		    
+		 OLD THOUGHTS:   
+
+                Well it has been an interesting experience so far , overwhelming at times but a discomfort worth going
+                through.
+                So far I have built the understanding to pass on the data from ARM to PRUusing a char driver interface
+                using rpmsgPRU. Then in the GPIOchip driver implementation the Linux OS sees the PRU as 9 i/o lines and
+                now I am heading towards making the linux sub system believe that it actually has a SPI controller but
+                which actually is a PRU. And in all this the data is transferred between the two subsystems using the
+                rpmsg.
+<p>
+                On looking closer there are several sub parts to this implementation
+
+                One key aspect is to run the probe function and setup everything automatically before the driver is
+                needed. Since we are not dealing here with hotpluggable device There are 2 options either do it through
+                the Device tree and write a overlay which when included in the uenv.txt would load this driver on boot
+                or let the rpmsg channel creation process trigger it as it is implemented in my gpiochip driver.
+
+                So the plan is to use the skeletoon of a SPI driver and make suitable modifications to accommodate for
+                sending the data using rpmsg. This implementation would have a more structured and widely accepted mode
+                selection unlike the gpiochip where to setup the SIPO or PISO mode we used a extra virtual gpio line.
+
+                Also there might be a need to tweek the PRU firmware to make it work with the new driver and some
+	optimisations in the speed at which the PRU bit bangs the shift register.</p>
+
+		<p>
+                So the research that I did in the past 24-48 hours is that I went through a nice linux foundation video
+                (https://www.youtube.com/watch?v=MV8Sy6jGUIE )to understand the protocol good enough. Also went through
+                the sample SPI drivers in the beaglebone linux repo and motorola docs. I have also put up a skeleton of SPI driver in the dev branch
+			https://github.com/deebot/Beaglebone-BidirectionBus/tree/dev
+
+		    </P>
+
+
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

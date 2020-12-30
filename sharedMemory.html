@@ -1,0 +1,216 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>Shared Memory Spaces</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">A quick Guide to Shared Memory Space</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">June 21, 2020</span>
+
+                    <h1>
+                        <br />
+                        A quick Guide to Shared Memory Space</h1>
+
+                </header>
+
+         
+                <p>
+			There are two improtant sub systems in the AM335X the ARM subsystem and the PRU sub system
+                        To get the best out of both the worlds one need to setup a communication mechanism between two. There
+			are several memory options which can be used to establish this communication. Basically when establishing
+			communication the ARM side will write to a memory location and then will raise inturrupt so that the 
+			PRU knows that its time to read the new data. Similarly when PRU writes something to the memory it tells t
+			the ARM about new data. Apart from intrupts ring buffers can also be used.
+			
+			Now coming to the shared memory options. If you look at the image below there is a shared RAM area of
+			12KB. This area is accesable by both PRU0 as well as PRU1 as well as by the ARM subsystem. However access
+			to this shared RAM will be faster for both the PRUs but will be slower from the ARM. Apart from this
+			there is Instruction RAM and Data RAM for each PRU. 
+			<div class="image main"><img src="images/Architecture.png" alt="" /></div>
+		    The access time of these memory locations is as below
+		    
+		   <tr>
+                        <th>Memory</th>
+                        <th>Access Time</th>
+                    
+
+		    </tr>
+                    
+		<tr>
+                        <td>Instruction RAM</td>
+                        <td>1 cycle</td>
+                </tr>
+		<tr>
+                        <td>Data RAM</td>
+                        <td>3 cycle</td>
+                </tr>
+		<tr>
+                        <td>Shared DataRam</td>
+                        <td>3 cycle</td>
+		 </tr>
+
+                </p>
+		
+		<p>
+			Apart from this OCMC RAM can also be used for sharing the data. It is of 64KB which is much larger
+			than the 12KB shared RAM inside PRUSS. The base address for this location is 40300000. However the first
+			8KB is used by Kernal. so effectively we have 56KB of memory that can be used to share data.
+			This memory is much slower for the PRUs to read from but should be faster for the ARM to access.
+			Further there is also a shared memory space below the L3 interconnect that can also be used to share data.
+			to see the memory map one can  do  cat /proc/iomem
+			There is another important aspect of memories in Linux and that is the fact that On Linux systems, 
+			every memory address is virtual. They do not point to any address in
+			the RAM directly. Whenever you access a memory location, a translation mechanism is
+			performed in order to match the corresponding physical memory. On Linux systems, each process owns a 
+			virtual address space. It is a kind of memory sandbox during the life of the process. That address space is 4 GB in size
+			on 32-bit systems (even on a system with physical memory less than 4 GB). For each
+			process, that 4 GB address space is split into two parts: </br>
+			User space virtual addresses </br>
+			Kernel space virtual addresses</br>
+			This is called a 3G/1G split, where the user space is given the lower 3 GB of virtual address space,
+			and the kernel uses the upper remaining 1 GB. A typical process's virtual address space
+			layout looks like the following:
+			<div class="image main"><img src="images/memory.png" alt="" /></div>
+			
+		</p>
+		<p>
+			There are various functions that one can use while writing drivers that need to access memories like
+			kmalloc, vmalloc and ioremap. Each having their pros and cons and usage senarious. I am also still a begin
+			ner and trying to get my head around all this. However i have figured out some great resourses which should
+			get you going with the detailed understanding and could save you time.
+			
+			
+			</p>
+<p>
+	<h4>Important References  to understand how to access  Memory  in kernal modules
+		 <ul>
+ 			 <li> chapter Name: Using I/O Memory: in book titled Linux Device Driver 3rd Edition , page no 249 Onwards</li>
+ 			 <li>Chapter Name: Kernel Memory Managment: in book titled Linux Device Driver Development-John Madieu</li>
+ 			 <li> A kernal Module written by me to read and write to OCMC on beaglebone https://github.com/deebot/Beaglebone-BidirectionBus/tree/master/MEMdriver</li>
+		</ul> 
+	
+	</p>
+
+
+
+
+
+
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

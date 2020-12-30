@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Working with rpmsg on PRU0 and PRU1</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript>
+		<link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+	<!-- Wrapper -->
+	<div id="wrapper">
+
+		<!-- Header -->
+		<header id="header">
+			<a href="index.html" class="logo"></a>
+		</header>
+
+		<!-- Nav -->
+		<nav id="nav">
+			<ul class="links">
+				<li><a href="index.html">Home</a></li>
+				<li class="active"><a href="generic.html">Working with rpmsg on PRU0 and PRU1</a></li>
+				<!--	<li><a href="elements.html">Elements Reference</a></li> -->
+			</ul>
+			<ul class="icons">
+				<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+				<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+				<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+				<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+			</ul>
+		</nav>
+
+		<!-- Main -->
+		<div id="main">
+
+			<!-- Post -->
+			<section class="post">
+				<header class="major">
+					<!--	<span class="date">April 25, 2017</span> -->
+					<span class="date">July 11, 2020</span>
+
+					<h1>
+						<br />
+						Working with rpmsg on PRU0 and PRU1</h1>
+
+				</header>
+
+				<h3>Introduction</h3>
+				<p>
+					Beaglebone boards are an example of Heterogenous computing systems . Such systems refers to systems
+					that use more than one kind of processors or cores. The objective of deploying different
+					architectures can be
+					to gain performance or energy efficiency by adding dissimilar coprocessors. In the beaglbone boards
+					one of the coprocessors
+					implemented is called PRUs. There are two of these termed as PRU0 and PRU1 and are used to perform
+					tasks where real time performence is required.
+				</p>
+				<p>
+					In order to establish communication between the two RPMsg framework is used. It is based on virtio
+					vrings to send/receive messages to/from the
+					remote CPU over shared memory.The vrings are uni-directional, one vring is dedicated to messages
+					sent to
+					the remote processor, and the
+					other vring is used for messages received from the remote processor. In addition, shared buffers are
+					created in memory space visible to both processors.The Mailbox framework is then used to notify
+					cores
+					when new messages are waiting in the shared buffers.
+					Relying on these frameworks, The RPMsg framework implements a communication based on channels. The
+					channels are identified by a textual name and have a local (“source”) RPMsg address, and a remote
+					(“destination”) RPMsg address”.
+
+					Recently i wanted to implement communication between PRU0 and ARM core. I started with the
+					<a href="https://github.com/dinuxbg/pru-gcc-examples/tree/master/hc-sr04-range-sensor"
+						style="color:rgba(255,0,0,0.5);"> Ultrasonic sensor</a> example. Here you can see the Rpmsg
+					fuctionality is implemented on
+					the PRU1 core.But I wanted write my own code that could run on PRU0 as most of the enhanced PRU
+					pins
+					exposed
+					on the header of pocketbeagle belongs to PRU0. In my further investigation i figured out some
+					important aspects that one need to keep me mind to succeed in porting or implmenting rpmsg on any
+					PRU
+					core.
+					Here i will be showing the changes that one should make in the ultrasonic sensor code to run it on
+					Core0 and in the process you would understand some important aspects.</br>
+				</p>
+				<p>
+					Broadly speaking when the code is loaded in the PRU using remoteproc, a channel is created
+					with the name defined in the CHAN_NAME. Setting right value to it is very important as it determines
+					which kernal module will be probed and used. Moreover, system events are configured using
+					TO_ARM_HOST and
+					FROM_ARM_HOST. Further whenever ARM core writes to shared memory it sets the interrupt pin, There is
+					bit 31 of r31 register for PRU1 interrupt and bit 30 for PRU0.
+
+				</p>
+				<h3>Configuration for PRU1<h3></h3>
+
+
+					<code>
+							#define HOST_INT ((uint32_t) 1 << 31) </br>
+							#define TO_ARM_HOST 18 </br>
+							#define FROM_ARM_HOST 19 </br>
+							#define CHAN_NAME "rpmsg-pru" </br>
+							#define CHAN_DESC "Channel 31" </br>
+							#define CHAN_PORT 31 </br>
+						</code>
+					<p>
+						Apart from this you will have a resoure_table_1.h file included in your main file. This file
+						also
+						has 2 important sections which need to be configured with specific values as shown.
+					</p>
+					<p>Mapping ofsystem events to a channel. Each pair contains a sysevt, channel.></p>
+					<code>
+
+						struct ch_map pru_intc_map[] = { {18, 3}, <br>
+											 {19, 1}, 
+					}; 
+					</code>
+					<p> Channel-to-host mapping, 255 is used for unused Mapping Channel-1 to Host-1 (PRU0/1 R31 bit 31),
+						HOST_UNUSED
+						represents 255
+					</p>
+					<code>
+				{ 
+					HOST_UNUSED, 1, HOST_UNUSED, 3, HOST_UNUSED, </br>
+					HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED </br>
+				}, </br>
+				</code>
+					<h3>Configuration For PRU0 <h3></h3>
+
+
+						<code>
+							#define HOST_INT ((uint32_t) 1 << 30) </br>
+							#define TO_ARM_HOST 16 </br>
+							#define FROM_ARM_HOST 17 </br>
+							#define CHAN_NAME "rpmsg-pru" </br>
+							#define CHAN_DESC "Channel 30" </br>
+							#define CHAN_PORT 30 </br>
+						</code>
+
+						</p>
+						<p>Similarly resource_table_0 file need to have following values </br>
+							Mapping ofsystem events to a channel. Each pair contains a sysevt, channel.></p>
+						<code>
+
+						struct ch_map pru_intc_map[] = { {16, 2}, <br>
+											 {17, 0}, 
+					}; 
+					</code>
+						<p> Channel-to-host mapping, 255 is used for unused Mapping Channel-0 to Host-0
+							HOST_UNUSED
+							represents 255
+						</p>
+						<code>
+				{ 
+					0, HOST_UNUSED, 2, HOST_UNUSED, HOST_UNUSED, </br>
+					HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED, HOST_UNUSED </br>
+				}, </br>
+				</code>
+
+<p>
+				I have also created a patch to automatically make the changes and port the code in the repository to run on PRU0.
+
+<a href="https://github.com/deebot/pru-gcc-examples"style="color:rgba(255,0,0,0.5);">Patch using the instructions in README</a></p>
+
+						<p>
+						<h4>TI resource file links<h4></h4>
+							<ul>
+								<li> <a href="https://git.ti.com/cgit/pru-software-support-package/pru-software-support-package/tree/examples/am335x/PRU_RPMsg_Echo_Interrupt0/resource_table_0.h"
+										style="color:rgba(255,0,0,0.5);">resource_table_0.h</a>
+								</li>
+								<li> <a href="https://git.ti.com/cgit/pru-software-support-package/pru-software-support-package/tree/examples/am335x/PRU_RPMsg_Echo_Interrupt1/resource_table_1.h"
+										style="color:rgba(255,0,0,0.5);">resource_table_1.h</a>
+								</li>
+
+							</ul>
+
+							</p>
+
+
+
+
+
+
+			</section>
+
+		</div>
+
+		<!-- Footer -->
+		<!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+		<!-- Copyright -->
+		<div id="copyright">
+			<ul>
+				<li>&copy; Untitled</li>
+				<li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+			</ul>
+		</div>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.scrollex.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>Logging Serial Boot Messages</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">Logging Serial Boot Messages</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">June 6, 2020</span>
+
+                    <h1>
+                        <br />
+                        Logging Serial Boot Messages</h1>
+
+                </header>
+
+                <h3>Introduction</h3>
+                <p>
+                    There might be situations when your Beaglebone image might not bootup, you might be playing around with
+                    uboot , MLO/SPL
+                    or might have added a new static module to kernal that might be stopping the image to boot. In all
+                    such
+                    cases you might want to peek inside the messages sent on the serial console. One of the recomended
+                    way i have
+                    seen on various blog posts and in books is to buy a USB to ttl cable like <a
+                        href="https://www.adafruit.com/product/954">Adafruit USB-TTL</a>
+                    These can cost around 10 $ or so. They come with several variants of chip CP210x and FT232. One
+                    importatnt
+                    thing to keep in mind is that if you are going to use these with beaglebone boards one must buy
+                    those
+                    which convert 5v to 3.3v as beaglebone pins are only 3.3v tolerant.
+                    Anyways i am not going to show you how to use these chips, What i am going to share is that if you
+                    have
+                    more than one beaglebones laying around you can use one of them to capture the serial messages that
+                    the
+                    other spits on boot. (Who knows may be after reading this post you might buy a pocket beagle by
+                    adding 15$
+                    and get somthing which not only can be a serial message visualiser but also can do more stuff)
+                    </Inp>
+                </p>
+                <h3>Hardware Setup</h3>
+                <p>
+                    I have a Pocket Beagle and a beaglebone black wireless laying around with me. I wanted to see the
+                    serial
+                    messages on pocketbeagle that are sent to the console when my beaglebone wireless boots up.To achieve this
+	    i made connections as following</br>
+                    CONNECTIONS: </br>
+                    On beaglebone black wireless or standard beaglebone,there is a 6 pin header adjacent to P9 header just in between the main
+                    OCTAVO chip
+                    and P9. On this header,if you start counting from the pin nearest to the barrel jack, the 1st pin is GND, 5th pin
+                    is TX
+                    and 6th pin is RX.
+                    In case of pocketbeagle on the P1 header the Pin 32 (or Pin 8 ) can act as UART RX pin.</br>
+                    connect: </br>
+                    TX (pin 5 on the serial header of beagle wireless) ----> RX (pin32 or pin8)</br>
+                    GND (beaglewireless)-------------------------> GND (pocketbeagle)</br>
+                </p>
+                <h3>Software to view the messages</h3>
+                <p>
+		    Your pin32 on pocketbeagle might or mightnot be configured to act as UART RX pin. To configure it </br>
+                    sudo config-pin P1.32 uart</br>
+		NOTE: P1.32 corresponds to Pin number 32 on expension header.Change pin number accordingly if using Pin 8.</br> 
+		    
+                    Now we need a software to view and capture the serial messages. You can use minicom or
+                    screen to do so. Install screen using following command: </br>
+                    sudo apt-get install screen </br>
+                    now to set it up to capture. Run </br>
+                    sudo screen -L -Logfile logMessageBoot  /dev/ttyS0 115200 </br>
+                    after running this command connect power to your beaglebonewireless through USB or barrel jack.You should 
+                    start seeing text on your console.The command will log the data in logMessageBoot file which should be in
+                    your current working directory.</br>
+                    this file doesnot open up with every text editor it is better to transfer the data to .txt file. TO do so </br>
+                    cat logMessageBoot >logFile.txt </br>
+                    Also plese note that the ttyS0 or ttyS1 etc  will work for you depends on the uart to which you have made connections
+
+                </p>
+
+
+
+
+
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

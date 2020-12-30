@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>PRU Register Mapping</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">Mapping PRU pins on Header with R30,r31</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">June 14, 2020</span>
+
+                    <h1>
+                        <br />
+                        Mapping PRU pins on Header with R30,r31</h1>
+
+                </header>
+
+                <h3>Introduction</h3>
+                <p>
+                    On Pocket beagle, Beaglbone black , beagle Wireless etc there are 2 Programable real time units
+                    which can
+                    operate at 200MHz and are suitable for applications where a real time performence is required. The
+                    picture below shows the PRU pins coloured in cyan colour.
+                <div class="image main"><img src="images/beagPoc.PNG" alt="" /></div>
+
+                There are 2 variants of compilers namely clpru and pru-gcc available which allows developer to write
+                a c, c++ code to interface peripherals with PRU. There are 2 32 bit registers namely R30 and R31 which
+                control
+                the PRU pins. The R30 register controls the PRU pins output and R31 controls the input.
+
+
+                So the the first hurdle is to translate the pin number on the header to the bit number on the register
+                which controls the pin. For example on pocketbeagle the pin P2.34 is controlled by 5th bit of the
+                R30 and R31.There is no easy way to figureout this relation. If you are stuck in your programing
+                task like i was here is a table below to get you going. In the first column the last digit is the bit
+                number
+                the second column explains if this register is output or input. 3rd column gives you the alphanumeric
+                pysical pin
+                on the Processor IC. The 4th and 5th columns represent the pins on the header of pocket beagle and
+                beaglebone Black
+                respectively.So when you switching from one board to another you can make a edit in the code
+                accordingly.
+
+                <table style="width:100%">
+                    <tr>
+                        <th>Bit Number</th>
+                        <th>Description</th>
+                        <th>ZCZ Ball</th>
+
+                        <th>PocketBeagle</th>
+                        <th>Beaglebone Black</th>
+
+
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_6</td>
+                        <td>output</td>
+                        <td>D13</td>
+                        <td>P2.28</td>
+                        <td>P9.41</td>
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_3</td>
+                        <td>output</td>
+                        <td>C12</td>
+                        <td>P2.30</td>
+                        <td>P9.28</td>
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_10</td>
+                        <td>Output</td>
+                        <td>D12</td>
+                        <td>P2.32</td>
+                        <td>P9.30</td>
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_5</td>
+                        <td>Output</td>
+                        <td>C13</td>
+                        <td>P2.34</td>
+                        <td>P9.27</td>
+
+
+                    <tr>
+                        <td>pr1_pru0_pru_r30_7</td>
+                        <td>Output</td>
+                        <td>A14</td>
+                        <td>P1.29</td>
+                        <td>P9.25</td>
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_4</td>
+                        <td>Output</td>
+                        <td>B12</td>
+                        <td>P1.31</td>
+                        <td>P9.42</td>
+
+
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_1</td>
+                        <td>Output</td>
+                        <td>B13</td>
+                        <td>P1.33</td>
+                        <td>P9.29</td>
+
+
+                    </tr>
+                    </tr>
+                    <tr>
+                        <td>pr1_pru0_pru_r30_10</td>
+                        <td>Output</td>
+                        <td>V5</td>
+                        <td>P1.35</td>
+                        <td>P8.28</td>
+
+
+                    </tr>
+
+                </table>
+
+                Similarly if you need to read the bits you should read it from R31 register. The bit number and relation
+                remains
+                the same.
+
+
+
+
+
+                </p>
+
+
+                <h3>How i figured out the Relation</h3>
+                Yeah!!! you are looking here. You want to know more. Dont you</br>
+                I first looked at the page no 86 of TRM availabe at<a
+                    href="https://www.ti.com/lit/ds/symlink/am3352.pdf">
+                    <b>AM335X TRM</b> </a><br> . In one
+                of the
+                column zczball i found the Pad numbers and from the first column i found the corresponding bit. After
+                this
+                I ran a perl script as following</br>
+
+                cd /opt/script/device/bone </br>
+                sudo perl show-pins.pl | grep P2.32 /</br>
+
+                The output it gave is as following: </br>
+                P9.27 105 C13 fast rx 6 pru 0 in 5 ocp/P2_34_pinmux (pinmux_P2_34_default_pin) </br>
+
+                Here you can see it displays C13 as the Physical pin number on the Processor chip the bit number is 5
+                and the header pins
+                are P2.34 and P9.27. I hope now you can figure out the relationship for any pin
+
+
+
+
+
+
+
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

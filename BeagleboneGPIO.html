@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+    <title>Google Summer Of Code</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Header -->
+        <header id="header">
+            <a href="index.html" class="logo"></a>
+        </header>
+
+        <!-- Nav -->
+        <nav id="nav">
+            <ul class="links">
+                <li><a href="index.html">Home</a></li>
+                <li class="active"><a href="generic.html">Beaglebone:GPIO Guide</a></li>
+                <!--	<li><a href="elements.html">Elements Reference</a></li> -->
+            </ul>
+            <ul class="icons">
+                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <div id="main">
+
+            <!-- Post -->
+            <section class="post">
+                <header class="major">
+                    <!--	<span class="date">April 25, 2017</span> -->
+                    <span class="date">May 17, 2020</span>
+
+                    <h1>
+                        <br />
+                        Beaglebone: A quick Guide to GPIO Subsystem</h1>
+
+                </header>
+
+                <h3>Introduction</h3>
+                <p>
+                    GPIO subsystem is a very important subsystem that allows the users to interface the board with
+                    sensors
+                    and other peripherals and allow interaction with real world.Pocket Beagle and Beaglebone black are
+                    the
+                    two most popular variants among the enthusiasts. Both of which have AM335X at its
+                    heat and 2 PRU which operate at 200MHz. On the Pocketbeagle the SIP that you see is by octavo
+                    systems,
+                    which integrates TI’s AM335X and several other components like LDO, PMIC on a single SIP. IN fact it
+                    is
+                    this integration which has made the current form factor of pocket beagle possible , further it also
+                    leads to faster and quicker
+                    development and production time if I would like to prototype on pocketbeagle and then create
+                    my own custom board around OSD335X.In this post I will try to declutter the GPIO subsytem. I am using following variant of Linux </br>
+			Linux beaglebone 4.19.94-ti-r42 #1buster SMP PREEMPT Tue Mar 31 19:38:29 UTC 2020 armv7l GNU/Linux
+                </p>
+                <h3>Inside the GPIO Subsystem</h3>
+                <p>
+                    In the AM335X there are 4 GPIO modules where each module supports 32 GPIO pins. So in total there
+                    are 128 GPIOs . However not all 128 GPIOs are available on the Beaglebone varients. The actual
+                    number
+                    depends on the variant that you will use.On a beaglebone Black you have 2 Expansion headers P8 and
+                    P9 respectively
+                    which have 46 pins on each of them. ON P8 one can use 44 GPIO, Pin 1 and 2 are used for ground
+                    purposes and on the P9 only 23 pins can be used as GPIO.Similarly on the Pocketbeagle you have P1
+                    and P2 expension
+                    headers which have 36 pins each. However 18 pins on P1 and 27 on P2 can be configured in GPIO mode
+                </p>
+                <p>
+                    The figure below shows different columns that you will find in Expension Header section of
+                    System Reference Manual. There is a SRM document for each Beaglebone Black and Pocket Beagle.For
+                    more details one
+                    can go through the <a
+                        href="https://github.com/beagleboard/beaglebone-black/wiki/System-Reference-Manual#70-connectors">
+                        <b>SRM LINK</b> </a>
+                <div class="image main"><img src="images/expension.PNG" alt="" /></div>
+
+                <ul>
+                    <li>PIN column is the pin number on the expansion header.</li>
+                    <li>The PROC column is the pin number on the processor.Further there is a document called
+                        Technical Reference Manual (TRM) which can be accessed <a
+                            href="http://www.ti.com/lit/ds/symlink/am3352.pdf">
+                            <b>HERE</b> </a>. On the page no 10 of this document you can see that the SOC is physically
+                        divided
+                        into 3 section and each pad can be located by combination of column name and row number.</li>
+                    <li>The Name column tells the default mode of the pin on poweron rest. However you can see the pin
+                        configured as in some other mode out of the box that might be due to the fact that a device tree
+                        overlay has altered it.</li>
+                    <li> The MODE columns are the mode setting for each pin. Setting each mode to align with the mode
+                        column will give that function on that pin. The mode 7 is the mode in which the pins can
+                        behaiave as general purpose input output.</li>
+                </ul>
+                <h3> Conversion into Software Friendly naming Convention</h3>
+                <p> In the image above which is taken from SRM, you would have noticed that the GPIOs are represented
+                    using a special convention, for example gpio1[2].This denotes that the pin is the 2nd pin of gpio
+                    module 1. But the
+                    kernel doesnot use this convention. So we need to know the corresponding number for this GPIO that
+                    the kernal would understand.
+                    In order to convert. Use the following algorithum <br>
+                    gpio1[2] = 1* 32 +2 = gpio34 <br>
+                    gpio0[4]= 0*32 + 4 = gpio 4<br>
+                    The entry corresponding to each pin can be found in the /sys/class/gpio directory as shown in the
+                    figure below
+                <div class="image main"><img src="images/GPIODIREC.png" alt="" /></div>
+
+                </p>
+                <h3>Mode configuration for GPIO</h3>
+                There is a register that controls the mode configuration settings for each pin. The control module
+                register section in the TRM explains it thoroughly.The PAD/PIN configurtion register starts at address
+                044E1800H(Base address(0x44E1000H) + 800H). The table below explains
+                the mode configurations.
+                <div class="image main"><img src="images/Modes.png" alt="" /></div>
+
+
+                </p>
+                <p>
+                <h3>Details of Directory which corresponds to Pad configuration
+                    Registers</h3>
+                The sys/kernel/debug/pinctrl/44e10800.pinmux-pinctrl-single directory contains information about the
+                configuration of pins as shown in the figure below.
+
+                <div class="image main"><img src="images/directoryreg.png" alt="" /></div>
+                On investigating further using the cat pins |more command one can see corresponding topins there is a
+                hex value for example for pin0 there is a hex value 00000027 which denotes that the pin is in
+                mode 7. Please note that the pin numbers you see here for example pin0 , pin1 here in the image above
+                donot corresponds to the numbers as shown in the expansion header table we saw in the SRM. These
+                register address as shown above for example 44e10800 can be helpful in locating the pin modes in the dts
+                files. Further when you run this commandyou can have a different default mode on your board if it is
+                configured differently in the dts file which is loaded on boot.
+                </p>
+                <p>
+                    Further You can also see if a pin is already claimed by sub system by running following command as
+                    shown in the image
+                    inside the syskernel/debug/pinctrl/44e10800.pinmux-pinctrl-single directory.You should be very
+                    clearful
+                    in dealing with the pins which are already claimed.
+                <div class="image main"><img src="images/claim.png" alt="" /></div>
+                Once we narrow down on a unclaimed pin we and before we configure it according
+                to our need, we might be intrested to know the current mode in which the pin is configured
+                Lets take an example
+                lets say you are looking for a pin to use as GPIO and you run the command as shown in the figure above
+                and findout that pin10 Iis unclaimed.You can see that pin10 is pin 1_34 on my expansion header and is in
+                default mode. Now the next immediate point of investigation isto know what is its default mode. To know
+                this one can run the following command
+                cat pins | grep "pin 10"
+                <div class="image main"><img src="images/defaultmode.png" alt="" /></div>
+                So as you can see the pin 10 is already in the GPIO mode so we dont need to reconfigure the mode.
+                <p>
+
+                    Pin Groups <br>
+                    Certain pins can belong to a perticular group, for example the mmc pins can be grouped in a group to
+                    know the groups one can do.<br>
+                    cat pingroups | more<br>
+                <div class="image main"><img src="images/defaultmode.png" alt="" /></div>
+                </p>
+
+                <h3>User LEDs and controlling them through sysfs</h3>
+
+                The SRM tells us that the user LEDs are actually connected as below.
+
+                <div class="image main"><img src="images/userled.png" alt="" /></div>
+                You can control these LEDs and assign them different operations like blink after a delay, heartbeat
+                pattern, blink when the memory card is accessed etc.The entry for each userLED can be seen in the
+                following directory as shown in the figure. Further if you cat the trigger, we can see the different
+                settings for UserLEDs. The currently active setting is shown inside the brackets. For <example
+                    heartbeat=""></example>
+                <div class="image main"><img src="images/userleddir.png" alt="" /></div>
+                In order to activate a configuration you can do echo "hearbeat"> trigger or echo "none" > triggger to
+                turn it off.
+                Similarly you can set these LEDs to perform different tasks.
+                </p>
+                <p>
+                <h3>Some Important Links</h3>
+                <a href="https://github.com/beagleboard/pocketbeagle/wiki/System-Reference-Manual">
+                    <b>PocetBeagle SRM LINK</b> </a><br>
+                <a href="https://github.com/beagleboard/beaglebone-black/wiki/System-Reference-Manual">
+                    <b>BeagleboneBlack SRM LINK</b> </a><br>
+                <a
+                    href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwispp2_07rpAhUWzzgGHbFwDTUQFjAAegQIBhAB&url=https%3A%2F%2Fcdn-shop.adafruit.com%2Fdatasheets%2FBBB_SRM.pdf&usg=AOvVaw0bT9DkmzCjIxB3qXsnHGZ3">
+                    <b>BeagleboneBlack SRM PDF</b> </a> <br>
+
+                <a href="http://www.ti.com/lit/ds/symlink/am3352.pdf">
+                    <b>TRM A335X LINK</b> </a><br>
+
+
+
+                </p>
+
+
+
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <!--	<footer id="footer">
+			<section>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field">
+							<label for="name">Name</label>
+							<input type="text" name="name" id="name" />
+						</div>
+						<div class="field">
+							<label for="email">Email</label>
+							<input type="text" name="email" id="email" />
+						</div>
+						<div class="field">
+							<label for="message">Message</label>
+							<textarea name="message" id="message" rows="3"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" /></li>
+					</ul>
+				</form>
+			</section>
+			<section class="split contact">
+				<section class="alt">
+					<h3>Address</h3>
+					<p>1234 Somewhere Road #87257<br />
+						Nashville, TN 00000-0000</p>
+				</section>
+				<section>
+					<h3>Phone</h3>
+					<p><a href="#">(000) 000-0000</a></p>
+				</section>
+				<section>
+					<h3>Email</h3>
+					<p><a href="#">info@untitled.tld</a></p>
+				</section>
+				<section>
+					<h3>Social</h3>
+					<ul class="icons alt">
+						<li><a href="#" class="icon brands alt fa-twitter"><span class="label">Twitter</span></a></li>
+						<li><a href="#" class="icon brands alt fa-facebook-f"><span class="label">Facebook</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-instagram"><span class="label">Instagram</span></a>
+						</li>
+						<li><a href="#" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+					</ul>
+				</section>
+			</section>
+		</footer>  -->
+        <!-- Copyright -->
+        <div id="copyright">
+            <ul>
+                <li>&copy; Untitled</li>
+                <li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/jquery.scrolly.min.js"></script>
+    <script src="assets/js/browser.min.js"></script>
+    <script src="assets/js/breakpoints.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
