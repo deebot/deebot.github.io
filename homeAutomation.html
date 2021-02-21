@@ -12,7 +12,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 	<link rel="stylesheet" href="assets/css/main.css" />
 	<noscript>
-		<link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="assets/css/noscript.css" />
+	</noscript>
 </head>
 
 <body class="is-preload">
@@ -49,34 +50,48 @@
 					<!--	<span class="date">April 25, 2017</span> -->
 					<h1>Details
 						<br />
-						Home Automation Page</h1>
+						Home Automation Page
+					</h1>
 					<p>Basic idea is to create a retrofit solution that can be installed with minimal changes and doesnt
 						alter the conventional interaction process</p>
 				</header>
 				<div class="image main"><img src="images/homeautomationMain.png" alt="" /></div>
 
 				<p>
-					<h3>Introduction </h3>
-					SmartX is an IOT solution that can convert a regular switch board into a smart board that can be
-					controlled over the network using a web interface as well as using the physical buttons in the
-					conventional manner. It is a highly scalable solution that can integrate multiple switch boards and
-					sensors which can talk to each other through a central hub over MQTT and can automate redundant
-					tasks based on the sensor feed.Switches and other sensor nodes use ESP8266 for communicating over
-					wifi and SSRs for switching the load. The PCBs are designed in such a foam factor that it can be
-					installed on a standard switch board .The Hub is built around Raspberrypi Zero and runs
-					Homeassistant under the hood along with some other custom built services.
+				<h3>Introduction </h3>
+				SmartX is an IOT solution that can convert a regular switch board into a smart board that can be
+				controlled over the network using a web interface as well as using the physical buttons in the
+				conventional manner. It is a highly scalable solution that can integrate multiple switch boards and
+				sensors which can talk to each other through a central hub over MQTT and can automate redundant
+				tasks based on the sensor feed.Switches and other sensor nodes use ESP8266 for communicating over
+				wifi and SSRs for switching the load. The PCBs are designed in such a foam factor that it can be
+				installed on a standard switch board .The Hub is built around Raspberrypi Zero and runs
+				Homeassistant under the hood along with some other custom built services.
 
 
-					<h3>User Interaction</h3>
-					When the user turns on the Hub for the first time it automatically scans for wifi networks and tries
-					to connect to a known network obviously on first boot it doesn’t have user’s wifi credentials hence
-					it turns itself into a hotspot and indicates this state by a Blue colour LED indication. The user
-					can then connect to the hotspot and enter credentials on the landing page. After that the system
-					reboots and once the hub gets connected to the home WIFI network it indicates that by green LED
-					indication. A similar process is followed on the smart switch board side
+				<h3>User Interaction</h3>
+				When the user turns on the Hub for the first time it automatically scans for wifi networks and tries
+				to connect to a known network obviously on first boot it doesn’t have user’s wifi credentials hence
+				it turns itself into a hotspot and indicates this state by a Blue colour LED indication. The user
+				can then connect to the hotspot and enter credentials on the landing page. After that the system
+				reboots and once the hub gets connected to the home WIFI network it indicates that by green LED
+				indication. A similar process is followed on the smart switch board side
 
-					Once all the configuration is done you are ready to control the device over the network or in a
-					conventional manner
+				Once all the configuration is done you are ready to control the device over the network or in a
+				conventional manner
+				</p>
+				<p>
+					Team:<br>
+
+					BreadBoard Prototyping:Deepankar <br>
+					Board Design,Fab coordination and Assembly: Deepankar <br>
+					Software and Firmware: Deepanakar <br>
+					Encloser Assembly concepts and Design: Vishal Senger <br>
+
+
+
+
+
 				</p>
 			</section>
 
